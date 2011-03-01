@@ -40,5 +40,29 @@ describe SessionsController do
         flash.now[:error].should =~ /invalid/i
       end
     end
-  end
+
+    describe "success" do
+
+      # we want a before block to describe some Attributes used during success block
+      before(:each) do
+        @user = Factory(:user)
+        # attr hash for user's email and pass
+        # the 'Factory' sets the attr_accessor :password in the user.rb
+        @attr = { :email => @user.email, :password => @user.password }
+      end
+
+      it "should sign the user in" do
+        post :create, :session => @attr
+        # Fill in with tests for a signed-in user.
+        controller.current_user.should == @user
+        controller.should be_signed_in           #calling be_signed_in should be be_singed_in bollearn ?
+      end
+
+      it "should redirect to the user show page" do
+        post :create, :session => @attr
+        response.should redirect_to(user_path(@user))      # remember in rspec we have to user_path
+      end
+    end
+
+  end  # POST create
 end

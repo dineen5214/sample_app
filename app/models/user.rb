@@ -1,5 +1,5 @@
 # == Schema Information
-# Schema version: 20110223161546
+# Schema version: 20110223205937
 #
 # Table name: users
 #
@@ -9,6 +9,7 @@
 #  created_at         :datetime
 #  updated_at         :datetime
 #  encrypted_password :string(255)
+#  salt               :string(255)
 #
 
 require 'digest'
@@ -35,11 +36,21 @@ class User < ActiveRecord::Base
 
   # class method to call authenticate
   #  self.find_by_email 
+
   class << self
+
     def authenticate(email, submitted_password)
       user = find_by_email(email)
-      return nil  if user.nil?
-      return user if user.has_password?(submitted_password)
+      #return nil  if user.nil?
+      #return user if user.has_password?(submitted_password)
+      ### refactor two above with Terary Oper as below
+      (user && user.has_password?(submitted_password)) ? user : nil
+    end
+
+    # In class method there is no 'salt' as #{salt} from User below
+    def authenticate_with_salt(id, cookie_salt)
+      user = find_by_id(id)
+      (user && user.salt == cookie_salt) ? user : nil
     end
   end
 
