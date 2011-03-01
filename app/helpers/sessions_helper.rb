@@ -16,8 +16,15 @@ module SessionsHelper
 
   def signed_in?
       # when current_user is not nil, is already signed in
-    !current_user.nil?     # should return true is no signed in
+    !current_user.nil?     # should return true is no signed in   # this works without self. prefix
 
+  end
+
+  def sign_out
+    cookies.delete(:remember_token)
+    #current_user = nil
+    ####self.current_user = nil
+    current_user = nil
   end
 
   private

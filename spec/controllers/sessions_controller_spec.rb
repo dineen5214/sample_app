@@ -65,4 +65,13 @@ describe SessionsController do
     end
 
   end  # POST create
+
+  describe "DELETE 'destroy'" do
+    it "should sign a user out" do
+      test_sign_in(Factory(:user))
+      delete :destroy                     # can not pass ID for no model behind session spec
+      controller.should_not be_signed_in
+      response.should redirect_to(root_path)       # always redirect to user show page
+    end
+  end
 end
