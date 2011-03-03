@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
 
   before_filter :authenticate, :only => [:edit, :update]
+  before_filter :correct_user, :only => [:edit, :update]
 
   def show
     @user = User.find( params[:id] )
@@ -24,6 +25,7 @@ class UsersController < ApplicationController
   end
 
   def edit
+    ######raise request.inspect       <- used to find fullpath var in requested object of page
     @user = User.find(params[:id])
     @title = "Edit user"
   end
@@ -42,5 +44,12 @@ class UsersController < ApplicationController
 
     def authenticate
       deny_access unless signed_in?
+    end
+
+    # remember we have a current user we can pull out
+    def correct_user
+      @user = User.find(params[:id])
+      redirect_to(root_path) unless current_user?(@user)
+      # the wrong user has signed in, yet we are passing the id of @user which do not match
     end
 end
