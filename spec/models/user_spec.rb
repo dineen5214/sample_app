@@ -157,4 +157,27 @@ describe User do
       end
     end
   end
+
+  describe "admin attribute" do
+
+    before(:each) do
+      @user = User.create!(@attr)
+    end
+
+    it "should respond to admin" do        # a user should have an admin attr
+      @user.should respond_to(:admin)
+    end
+
+    it "should not be an admin by default" do  # don't want users to be admin by default
+      @user.should_not be_admin
+      # note in Rspec booleon, does "be_"SOMETHING will call @user.admin? boolean
+      # @user.admin?.should_not  be_true     <- same as above or equvilent
+    end
+
+    it "should be convertiable to an admin" do   # should convert normal user to admin
+      @user.toggle!(:admin)      # the !  Writes change to the databsase
+      @user.should be_admin
+    end
+  end
+
 end

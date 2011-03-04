@@ -60,6 +60,30 @@ describe UsersController do
           response.should have_selector('a', :href => "/users?page=2",
                                              :content => "Next")
         end
+
+        it "should have delete links for admins" do
+          @user.toggle!(:admin)
+          # second user
+          other_user = User.all.second
+          get :index
+          #response.should have_selector('a', :href => "/user/#{other_user.id}")
+          # do below using the named route
+          response.should have_selector('a', :href => user_path(other_user),
+                                             :content => "delete")
+        end
+
+        it "should not have delete links for non-admins" do
+          ## do not toggle it here   @user.toggle!(:admin)
+          # second user
+          other_user = User.all.second
+          get :index
+          #response.should have_selector('a', :href => "/user/#{other_user.id}")
+          # do below using the named route
+          # should_not
+          response.should_not   have_selector('a', :href => user_path(other_user),
+                                                   :content => "delete")
+        end
+
     end
   end
 
@@ -283,6 +307,73 @@ describe UsersController do
         response.should redirect_to(root_path)
       end
     end
+  end
 
+  describe "DELETE 'destroy'" do
+    # we are following convention of HTTP Request (DELETE) than Action (destroy)
+
+    before(:each) do
+      @user = Factory(:user)
+    end
+
+    # as a non signed in user, should redirect us to the non-signed-in path
+
+    # notice methods we have:   get, put, post, delete see user routes sheet for GET, PUT, POST, DELETE
+
+    describe "as a non-signed-in user" do
+      it "should deny access" do
+        delete :destroy, :id => @user
+        response.should redirect_to(signin_path)
+      end
+    end
+    
+    describe "as non-admin user" do
+      # deny access, sign-in as the user, request delete,
+      # will not redirect to signin path cuase user in signed in already
+      # redirect to rootpath
+      it "should protect the action" do
+        test_sign_in(@user)
+        delete :destroy, :id => @user
+        response.should redirect_to(root_path)
+      end
+    end
+
+    describe "as an admin user" do
+
+      # create an admin user, we could toggle one of them but not for here
+      before(:each) do
+
+# make admin a Class Ivar
+        @admin = Factory(:user, :email => "admin@example.com", :admin => true)
+                # remember in Factory you can't actuall do this to :admin it is not attr_accessible
+                #  But the Factory by-passes the attr_accessible and can do this here
+
+        # then sign in as admin
+# @admin not admin
+        #test_sign_in(admin)
+        test_sign_in(@admin)
+      end
+
+      # it's eazy to destroy a record from what ActiveRecord gives to us
+      it "should destroy the user" do
+         # @user not the admin user, don't destroy admin user
+         lambda do
+           delete :destroy, :id => @user
+           end.should change(User, :count).by(-1)
+      end
+     
+      # if you are an admin, and you destroy a user, then go back to the users page
+      it "should redirect to the users page" do
+        delete :destroy, :id => @user
+        flash[:success].should =~ /destroyed/
+        response.should redirect_to(users_path)
+      end
+
+      it "should not be able to destroy itself" do
+        lambda do
+          delete :destroy,  :id => @admin
+        end.should_not change(User, :count)
+      end
+    end
   end
 end

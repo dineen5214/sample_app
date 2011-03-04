@@ -33,10 +33,13 @@ class UsersController < ApplicationController
   end
 
   def edit
+    ######raise request.inspect       <- used to find fullpath var in requested object of page
+    @user = User.find(params[:id])
     @title = "Edit user"
   end
 
   def update
+    @user = User.find(params[:id])
     if @user.update_attributes(params[:user])
        redirect_to @user, :flash => { :success => "Profile updated." }
     else
@@ -46,8 +49,7 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    User.find(params[:id]).destroy
-    redirect_to users_path, :flash => { :success => "User destroyed." }
+
   end
 
   private
@@ -64,7 +66,6 @@ class UsersController < ApplicationController
     end
 
     def admin_user
-      user = User.find(params[:id])
-      redirect_to(root_path) if !current_user.admin? || current_user?(user)
+      redirect_to(root_path) unless current_user.admin?
     end
 end
