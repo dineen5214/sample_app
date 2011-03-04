@@ -21,6 +21,10 @@ describe UsersController do
           @user = test_sign_in(Factory(:user))
           Factory(:user, :email => "another@example.com" )
           Factory(:user, :email => "another@example.net" )
+
+          30.times do
+            Factory(:user, :email => Factory.next(:email))
+          end
         end
 
         it "should be successful" do
@@ -37,9 +41,24 @@ describe UsersController do
           get :index
           # will have <li> for each user in the database
           # response should have an link or <li> to user's name
-          User.all.each do |user|
+#User.all.each do |user|
+          User.paginate(:page => 1).each do |user|
             response.should have_selector('li', :content => user.name)
           end
+        end
+
+        it "should paginate users" do
+          get :index
+          # there is a div for pagination class
+          response.should have_selector('div.pagination')   # the . here is the css class
+          # there is a Previous span
+          response.should have_selector('span.disabled', :content => "Previous")
+          # there is a link with a number
+          response.should have_selector('a', :href => "/users?page=2",
+                                             :content => "2")
+          # there is a link with a word next
+          response.should have_selector('a', :href => "/users?page=2",
+                                             :content => "Next")
         end
     end
   end
