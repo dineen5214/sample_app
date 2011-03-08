@@ -54,9 +54,10 @@ class UsersController < ApplicationController
 
   private
 
-    def authenticate
-      deny_access unless signed_in?
-    end
+    #moved into the app/helpers/sessions_helper.rb for microposts_controller to referenc
+    ####def authenticate
+      ####deny_access unless signed_in?
+    ####end
 
     # remember we have a current user we can pull out
     def correct_user
