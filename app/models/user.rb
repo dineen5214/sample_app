@@ -37,6 +37,19 @@ class User < ActiveRecord::Base
     encrypted_password == encrypt(submitted_password)
   end
 
+# user.microposts but inside the object the user is 'self'
+# can also leave off the self
+#  change:  self.microposts
+#      to:  microposts
+# this will not Generalize, so new syntax in Rails 3
+# now also, change to using Rails 3  "user_id = ?" 
+#      to:  Micropost.where("user_id = ?", self.id)
+# the 'where' does a conditional find
+  def feed
+    Micropost.where("user_id = ?", id)
+  end
+
+
   # class method to call authenticate
   #  self.find_by_email 
 
